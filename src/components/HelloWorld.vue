@@ -1,130 +1,140 @@
 <template>
-  <div class="hello">
-    <h1>{{ msg }}</h1>
-    <p>
-      For a guide and recipes on how to configure / customize this project,<br />
-      check out the
-      <a href="https://cli.vuejs.org" target="_blank" rel="noopener"
-        >vue-cli documentation</a
-      >.
-    </p>
-    <h3>Installed CLI Plugins</h3>
-    <ul>
-      <li>
-        <a
-          href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-babel"
-          target="_blank"
-          rel="noopener"
-          >babel</a
+  <div class="container">
+    <h2>ALGOLIA + VUE2</h2>
+    <ais-instant-search
+      :search-client="searchClient"
+      index-name="benchomatic-beta"
+    >
+      <div class="left-panel">
+        <ais-clear-refinements />
+        <h2>Title</h2>
+        <ais-refinement-list
+          attribute="title"
+          searchable
+          :attributesToSnippet="['title:10']"
+        />
+        <h2>Author</h2>
+        <ais-refinement-list attribute="authors" searchable />
+        <h2 class="mt-2">Publication year</h2>
+        <ais-refinement-list attribute="publication_year" />
+      </div>
+      <ais-configure :hitsPerPage="8" :attributesToSnippet="['title']" />
+      <div class="right-panel">
+        <div class="searchbox">
+          <ais-search-box />
+        </div>
+        <ais-hits>
+          <template v-slot:item="{ item }">
+            <div class="left-panel">
+              <img :src="item.image_url" align="left" :alt="item.title" />
+            </div>
+            <div class="right-panel">
+              <h2>
+                <ais-highlight
+                  attribute="title"
+                  :hit="item"
+                  highlightedTagName="mark"
+                  :attributesToSnippet="['title:10']"
+                />
+              </h2>
+              <div class="hit-authors">
+                Authors:
+
+                <span
+                  v-for="(fieldValue, index) in item.authors"
+                  :key="`highlight-${fieldValue}-${index}`"
+                >
+                  <ais-highlight :hit="item" :attribute="`authors.${index}`" />
+                  <template v-if="index < item.authors.length - 1">,</template>
+                </span>
+              </div>
+
+              <div class="hit-publication_year">
+                Pub. year:
+                <ais-highlight
+                  attribute="publication_year"
+                  :hit="item"
+                ></ais-highlight>
+              </div>
+              <div class="hit-average_rating">
+                Rating:
+                {{ item.average_rating }}
+              </div>
+              <div class="hit-ratings_count">
+                Total ratings:
+                {{ item.ratings_count }}
+              </div>
+            </div>
+          </template>
+        </ais-hits>
+
+        <ais-pagination />
+        <!-- <ais-pagination>
+        <template v-slot:first>first</template>
+        <template v-slot:previous>prev</template>
+        <template
+          v-slot:item="{ value, active }"
+          :style="{ color: active ? 'red' : 'green' }"
         >
-      </li>
-      <li>
-        <a
-          href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-router"
-          target="_blank"
-          rel="noopener"
-          >router</a
-        >
-      </li>
-      <li>
-        <a
-          href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-vuex"
-          target="_blank"
-          rel="noopener"
-          >vuex</a
-        >
-      </li>
-      <li>
-        <a
-          href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-eslint"
-          target="_blank"
-          rel="noopener"
-          >eslint</a
-        >
-      </li>
-    </ul>
-    <h3>Essential Links</h3>
-    <ul>
-      <li>
-        <a href="https://vuejs.org" target="_blank" rel="noopener">Core Docs</a>
-      </li>
-      <li>
-        <a href="https://forum.vuejs.org" target="_blank" rel="noopener"
-          >Forum</a
-        >
-      </li>
-      <li>
-        <a href="https://chat.vuejs.org" target="_blank" rel="noopener"
-          >Community Chat</a
-        >
-      </li>
-      <li>
-        <a href="https://twitter.com/vuejs" target="_blank" rel="noopener"
-          >Twitter</a
-        >
-      </li>
-      <li>
-        <a href="https://news.vuejs.org" target="_blank" rel="noopener">News</a>
-      </li>
-    </ul>
-    <h3>Ecosystem</h3>
-    <ul>
-      <li>
-        <a href="https://router.vuejs.org" target="_blank" rel="noopener"
-          >vue-router</a
-        >
-      </li>
-      <li>
-        <a href="https://vuex.vuejs.org" target="_blank" rel="noopener">vuex</a>
-      </li>
-      <li>
-        <a
-          href="https://github.com/vuejs/vue-devtools#vue-devtools"
-          target="_blank"
-          rel="noopener"
-          >vue-devtools</a
-        >
-      </li>
-      <li>
-        <a href="https://vue-loader.vuejs.org" target="_blank" rel="noopener"
-          >vue-loader</a
-        >
-      </li>
-      <li>
-        <a
-          href="https://github.com/vuejs/awesome-vue"
-          target="_blank"
-          rel="noopener"
-          >awesome-vue</a
-        >
-      </li>
-    </ul>
+          {{ value }}
+        </template>
+        <template v-slot:next>next</template>
+        <template v-slot:last>last</template>
+      </ais-pagination> -->
+      </div>
+    </ais-instant-search>
   </div>
 </template>
 
 <script>
+import algoliasearch from "algoliasearch/lite";
+import "instantsearch.css/themes/satellite.css";
+
 export default {
-  name: "HelloWorld",
-  props: {
-    msg: String,
+  data() {
+    return {
+      searchClient: algoliasearch(
+        "VMAF88UX7F",
+        "fcbf79aa3cdc5840e379799095495acd"
+      ),
+    };
   },
 };
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-h3 {
-  margin: 40px 0 0;
+<style>
+body {
+  font-family: sans-serif;
+  padding: 1em;
 }
-ul {
-  list-style-type: none;
-  padding: 0;
+
+.ais-Hits-list {
+  margin-top: 0;
+  margin-bottom: 1em;
 }
-li {
-  display: inline-block;
-  margin: 0 10px;
+
+.ais-InstantSearch {
+  display: grid;
+  grid-template-columns: 1fr 4fr;
+  grid-gap: 1em;
 }
-a {
-  color: #42b983;
+.ais-Hits-item {
+  display: grid;
+  grid-template-columns: 1fr 5fr;
+}
+.ais-Hits-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+}
+.ais-Hits-item img {
+  margin-right: 1em;
+}
+.hit-name {
+  margin-bottom: 0.5em;
+}
+.hit-description {
+  color: #888;
+  font-size: 0.8em;
+  margin-bottom: 0.5em;
 }
 </style>
